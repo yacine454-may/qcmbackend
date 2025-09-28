@@ -1,11 +1,12 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-let connectionString = process.env.SUPABASE_DB_URL;
+// Prefer SUPABASE_DB_URL, but gracefully fallback to DATABASE_URL (Render/Heroku convention)
+let connectionString = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
 if (!connectionString) {
-  console.warn('[DB] SUPABASE_DB_URL is not set. Please add it to your .env');
+  console.warn('[DB] SUPABASE_DB_URL/DATABASE_URL is not set. Please add it to your environment');
 } else if (!/sslmode=/.test(connectionString)) {
-  // Ensure SSL mode is enforced for Supabase
+  // Ensure SSL mode is enforced for Supabase/Render
   connectionString += (connectionString.includes('?') ? '&' : '?') + 'sslmode=no-verify';
 }
 
