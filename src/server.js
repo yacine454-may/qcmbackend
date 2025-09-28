@@ -40,7 +40,8 @@ app.use(cors({
 }));
 
 // Preflight support (Express 5 compatible pattern)
-app.options('(.*)', cors());
+// Remove problematic wildcard OPTIONS route for compatibility with Node.js v22+
+// app.options('(.*)', cors());
 
 // Lightweight startup migrations to ensure schema is compatible
 async function runMigrations() {
