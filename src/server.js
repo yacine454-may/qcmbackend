@@ -5,7 +5,42 @@ const db = require('./services/db');
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// Configure CORS for production deployment (supports mobile and Vercel previews)
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+  'https://resedqcm-front.vercel.app',
+  'https://resicoqcm-front.vercel.app',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, file://)
+    if (!origin) return callback(null, true);
+    try {
+      const url = new URL(origin);
+      const hostname = url.hostname;
+      const isVercel = hostname.endsWith('.vercel.app');
+      if (allowedOrigins.includes(origin) || isVercel) {
+        return callback(null, true);
+      }
+    } catch (e) {
+      // If origin is not a valid URL string, allow cautiously (mobile edge cases)
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Preflight support
+app.options('*', cors());
 
 // Lightweight startup migrations to ensure schema is compatible
 async function runMigrations() {
