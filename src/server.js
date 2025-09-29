@@ -40,7 +40,7 @@ app.use(cors({
 }));
 
 // Preflight support (Express 5 compatible pattern)
-app.options('(.*)', cors());
+app.options('*', cors());
 
 // Lightweight startup migrations to ensure schema is compatible
 async function runMigrations() {
