@@ -39,8 +39,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Preflight support (Express 5 compatible pattern)
-app.options('*', cors());
+// Preflight support is handled by the main CORS middleware above
 
 // Lightweight startup migrations to ensure schema is compatible
 async function runMigrations() {
