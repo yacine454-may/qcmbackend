@@ -1,17 +1,27 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Prefer SUPABASE_DB_URL, but gracefully fallback to DATABASE_URL (Render/Heroku convention)
+// Support both SUPABASE_DB_URL (local) and DATABASE_URL (Render/production)
 let connectionString = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
+
 if (!connectionString) {
-  console.warn('[DB] SUPABASE_DB_URL/DATABASE_URL is not set. Please add it to your environment');
-} else if (!/sslmode=/.test(connectionString)) {
-  // Ensure SSL mode is enforced for Supabase/Render
+  console.error('[DB] ERROR: No database connection string found!');
+  console.error('[DB] Please set either SUPABASE_DB_URL or DATABASE_URL environment variable');
+  throw new Error('Database connection string is required');
+}
+
+console.log('[DB] Connection string found:', connectionString.substring(0, 30) + '...');
+
+// Ensure SSL mode is enforced for Supabase/Postgres
+if (!/sslmode=/.test(connectionString)) {
   connectionString += (connectionString.includes('?') ? '&' : '?') + 'sslmode=no-verify';
 }
 
 // DEV ONLY: bypass TLS validation to avoid SELF_SIGNED_CERT_IN_CHAIN on Windows
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+// In production (Render), this should be handled by proper SSL config
+if (process.env.NODE_ENV !== 'production') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
 
 const pool = new Pool({
   connectionString,
