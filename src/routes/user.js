@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { signup, login, activate, getMe, updateMe, changePassword } = require('../controllers/userController');
 const { requireAuth } = require('../middleware/auth');
-const { pool } = require('../db');
+const { pool } = require('../services/db');
 
 // Signup
 router.post('/signup', (req, res, next) => {
